@@ -189,9 +189,6 @@ module phos_fec_v1 (
    output wire [ 3:0] TTL_LED_B
 );
 
-
-
-
 ////////////////////////////////////////////////////////////////
 //     LEDs Placement                             +---------+ //
 //                                                |         | //
@@ -215,5 +212,29 @@ module phos_fec_v1 (
 // LED #6 - Green
 // LED #7 - Green
 
+
+logic adc_clk_4x;
+logic adc_clk_2x;
+logic tdc_clk;
+
+logic [63:0][11:0]  adc_data_out;
+logic [6:0]         trigger_latency = 48;
+
+adc_data adc_data_inst
+(
+
+        .rst                ()
+    
+    ,   .dclk_p             (ADC_DCLK_P)
+    ,   .dclk_n             (ADC_DCLK_N)
+    ,   .adc_clk_x4         (adc_clk_4x)
+    ,   .adc_clk_x2         (adc_clk_2x)
+    ,   .adc_clk            (tdc_clk)
+    ,   .adc_data_in_p      (ADC_DOUT_P)
+    ,   .adc_data_in_n      (ADC_DOUT_N)
+    ,   .adc_data_out       (adc_data_out)
+    ,   .trigger_latency    (trigger_latency)
+
+);
 
 endmodule

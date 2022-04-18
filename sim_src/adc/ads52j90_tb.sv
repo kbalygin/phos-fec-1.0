@@ -31,11 +31,11 @@ logic fclk12;
 logic [3:0]fclk12_sh;
 logic ser_q;
 logic load;
-logic [23:0] ser_d[15:0];
-logic [15:0] adc_data_in;
-logic [31:0][11:0] adc_data_out;
+logic [23:0] ser_d[31:0];
+logic [31:0] adc_data_in;
+logic [63:0][11:0] adc_data_out;
 
-logic [11:0] data [31:0];
+logic [11:0] data [63:0];
 
 logic [11:0] deser_q;
 
@@ -43,7 +43,7 @@ logic adc_clk_x4;
 logic adc_clk_x2;
 logic adc_clk;
 
-ads52j90_readout ads52j90_readout_tb
+adc_data adc_data_dut
 (
         .rst            (rst)
     ,   .dclk_p         (dclk_p)
@@ -51,17 +51,19 @@ ads52j90_readout ads52j90_readout_tb
     ,   .adc_clk_x4     (adc_clk_x4)
     ,   .adc_clk_x2     (adc_clk_x2)
     ,   .adc_clk        (adc_clk)
-    ,   .adc_data_in    (adc_data_in)
+    ,   .adc_data_in_p  (adc_data_in)
+    ,   .adc_data_in_n  (~adc_data_in)
     ,   .adc_data_out   (adc_data_out)
+    ,   .trigger_latency(10)
 );
 
-always #10  dclk = ~dclk;
+always #1.0  dclk = ~dclk;
 assign dclk_n = ~dclk_p;
-always #30 fclk6 = ~fclk6;
-always #60 fclk12 = ~fclk12;
-always #120 adc_clk = ~adc_clk;
+always #3.0 fclk6 = ~fclk6;
+always #6.0 fclk12 = ~fclk12;
+always #12.0 adc_clk = ~adc_clk;
 always @(posedge dclk or negedge dclk)
-    #5 dclk_p <= dclk;
+    #0.5 dclk_p <= dclk;
 
 always @(posedge fclk6 or negedge fclk6)
     adc_clk_x4 <= fclk6;
@@ -75,7 +77,7 @@ always_ff @(posedge dclk or negedge dclk) load <= (fclk12_sh[1:0] == 2'b01);
 
 genvar j;
 generate 
-    for(j = 0; j < 16; j = j + 1)
+    for(j = 0; j < 32; j = j + 1)
     begin : adc_out
         always_ff @(posedge dclk or negedge dclk)
             if(load)
@@ -88,6 +90,15 @@ endgenerate
 
 integer i;
 
+genvar k;
+generate
+for(k = 0; k < 64; k = k + 1)
+begin : data_change
+    always_ff @(posedge fclk12)
+        data[k][11:6] <= data[k][11:6] + 1;
+end
+endgenerate
+
 initial
 begin
     dclk = 1;
@@ -95,7 +106,7 @@ begin
     fclk12 = 1;
     adc_clk = 1;
     rst = 1;
-    for(i = 0; i < 32; i = i + 1)
+    for(i = 0; i < 64; i = i + 1)
         data[i] = i + 1;
     #100
     rst = 0;

@@ -217,13 +217,77 @@ logic adc_clk_4x;
 logic adc_clk_2x;
 logic tdc_clk;
 
+logic dtc_clk;
+logic dtc_clk_90;
+logic dtc_trig;
+logic dtc_data;
+logic dtc_return;
+
 logic [63:0][11:0]  adc_data_out;
+logic [5:0]         read_addr;
 logic [6:0]         trigger_latency = 48;
 
-adc_data adc_data_inst
-(
+logic trig_l0;
+logic trig_l1;
 
-        .rst                ()
+main_pll main_pll_inst 
+(
+  // Clock out ports
+        .clk_out1   (tdc_clk)
+    ,   .clk_out2   (dtc_clk_90)
+    ,   .clk_out3   (adc_clk_2x)
+    ,   .clk_out4   (adc_clk_4x)
+    ,   .clk_out5   ()
+  // Status and control signals
+    ,   .reset      ()
+    ,   .locked     ()
+ // Clock in ports
+    ,   .clk_in1    (dtc_clk)
+ );
+
+IBUFDS 
+#(
+        .IOSTANDARD ("LVDS") // Specify the output I/O standard
+    ,   .DIFF_TERM  ("TRUE")
+//   .SLEW("SLOW")           // Specify the output slew rate
+) dtc_clk_inst (
+        .I          (CLK_DTC_P)
+    ,   .IB         (CLK_DTC_N)
+    ,   .O          (dtc_clk)
+);
+
+IBUFDS 
+#(
+        .IOSTANDARD ("LVDS") // Specify the output I/O standard
+    ,   .DIFF_TERM  ("TRUE")
+//   .SLEW("SLOW")           // Specify the output slew rate
+) dtc_trig_inst (
+        .I          (DTC_TRIG_P)
+    ,   .IB         (DTC_TRIG_N)
+    ,   .O          (dtc_trig)
+);
+
+OBUFDS #(
+   .IOSTANDARD("LVDS") // Specify the output I/O standard
+//   .SLEW("SLOW")           // Specify the output slew rate
+) dtc_data_inst (
+   .I   (dtc_data),
+   .O   (DTC_DATA_P),
+   .OB  (DTC_DATA_N)
+);
+
+OBUFDS #(
+   .IOSTANDARD("LVDS") // Specify the output I/O standard
+//   .SLEW("SLOW")           // Specify the output slew rate
+) dtc_return_inst (
+   .I   (dtc_return),
+   .O   (DTC_RETURN_P),
+   .OB  (DTC_RETURN_N)
+);
+
+adc_event_buf adc_event_buf_inst
+( 
+        .rst                (1'b0)
     
     ,   .dclk_p             (ADC_DCLK_P)
     ,   .dclk_n             (ADC_DCLK_N)
@@ -232,9 +296,39 @@ adc_data adc_data_inst
     ,   .adc_clk            (tdc_clk)
     ,   .adc_data_in_p      (ADC_DOUT_P)
     ,   .adc_data_in_n      (ADC_DOUT_N)
-    ,   .adc_data_out       (adc_data_out)
     ,   .trigger_latency    (trigger_latency)
+    
+    ,   .trig_l0            (trig_l0)
+    
+    ,   .rd_clk             (tdc_clk)
+    ,   .adc_buf_data_out   (adc_data_out)
+    ,   .read_addr          (read_addr)
 
+);
+
+dtc_phos_fec_v1 dtc_phos_fec_v1_inst
+(
+        .rst                (1'b0)
+    ,   .dtc_clk            (dtc_clk)
+    ,   .dtc_clk_90         (dtc_clk_90)
+    ,   .dtc_trig           (dtc_trig)
+    ,   .dtc_data           (dtc_data)
+    ,   .dtc_return         (dtc_return)
+    
+    ,   .trig_l0            (trig_l0)
+    ,   .trig_l1            (trig_l1)
+    
+    ,   .rstcmd             ()
+    ,   .status             ()
+    
+    ,   .adc_rd_addr        (read_addr)
+    ,   .adc_data           (adc_data_out)
+    
+    ,   .write              ()
+    ,   .write_data         ()
+    ,   .address            ()
+    ,   .read_data          ()
+    ,   .data_vld           ()
 );
 
 endmodule

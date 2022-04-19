@@ -39,7 +39,7 @@ module adc_event_buf
     
     output                  rd_clk,
     
-    output  [767:0]         adc_data_out,
+    output  [767:0]         adc_buf_data_out,
     
     input   [5:0]           read_addr
 
@@ -48,10 +48,12 @@ module adc_event_buf
 logic       [5:0]           mem_wr_addr = 0;
 logic                       mem_wr_en = 0;
 
+logic [767:0]         adc_data_out;
+
 adc_data adc_data_inst
 (
 
-        .rst                ()
+        .rst                (rst)
     
     ,   .dclk_p             (dclk_p)
     ,   .dclk_n             (dclk_n)
@@ -73,7 +75,7 @@ event_buf event_buf_inst
     ,   .dina               (adc_data_out)
     ,   .clkb               (rd_clk)
     ,   .addrb              (read_addr)
-    ,   .doutb              (adc_data_out)
+    ,   .doutb              (adc_buf_data_out)
 );
 
 always_ff @(posedge adc_clk)

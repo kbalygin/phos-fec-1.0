@@ -44,13 +44,14 @@ module dtc_phos_fec_v1
     output logic    [31:0]  write_data,
     output logic    [31:0]  address,
     input           [31:0]  read_data,
-    input                   data_vld
+    input                   data_vld,
+    output logic            read
 );
 
 logic rdocmd;
 logic streq;
 
-logic read;
+
 
 dtc_rx dtc_rx_inst
 (

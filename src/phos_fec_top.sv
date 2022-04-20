@@ -230,6 +230,17 @@ logic [6:0]         trigger_latency = 48;
 logic trig_l0;
 logic trig_l1;
 
+logic [31:0]    dtc_address;
+logic [31:0]    dtc_read_data;
+logic [31:0]    dtc_write_data;
+logic           dtc_write;
+logic           dtc_read;
+logic           dtc_data_vld;
+
+logic [15:0]    reg_pwr_en;
+
+assign ON_2V5_TDC = 1'b1;    
+
 main_pll main_pll_inst 
 (
   // Clock out ports
@@ -324,11 +335,58 @@ dtc_phos_fec_v1 dtc_phos_fec_v1_inst
     ,   .adc_rd_addr        (read_addr)
     ,   .adc_data           (adc_data_out)
     
-    ,   .write              ()
-    ,   .write_data         ()
-    ,   .address            ()
-    ,   .read_data          ()
-    ,   .data_vld           ()
+    ,   .write              (dtc_write)
+    ,   .write_data         (dtc_write_data)
+    ,   .address            (dtc_address)
+    ,   .read_data          (dtc_read_data)
+    ,   .data_vld           (dtc_data_vld)
+    ,   .read               (dtc_read)
 );
+
+dtc_cmd dtc_cmd_inst
+(
+        .rst                ()
+    ,   .dtc_clk            (dtc_clk)
+    ,   .address            (dtc_address)
+    ,   .write_data         (dtc_write_data)
+    ,   .read_data          (dtc_read_data)
+    ,   .write              (dtc_write)
+    ,   .read               (dtc_read)
+    ,   .data_vld           (dtc_data_vld)
+    
+    ,   .reg_pwr_en         (reg_pwr_en)
+    ,   .status             ()
+    ,   .thyst              ()
+    ,   .toti               ()
+    ,   .channel_mask       ()
+    ,   .altro_rst          ()
+    ,   .fee_rst            ()
+    ,   .hv_update          ()
+    ,   .firmvare           ()
+    ,   .adc_data           ()
+    ,   .hv_dac_data        ()    
+);
+//*****POWER CONTROL*****//
+//Clock power always enable
+assign ON_2V5_CLK       = 1'b1;             
+//Strip unit power enable
+assign ON_12V5          = reg_pwr_en[4];    
+assign ON_N5V0          = reg_pwr_en[4];
+//ADC power enable
+assign ON_1V8A_ADC      = reg_pwr_en[0];
+assign ON_1V8D_ADC      = reg_pwr_en[0];
+assign ON_1V2D_ADC      = 1'bz;     //Enable when 1V8D_ADC power good
+//Shaper power enable
+assign ON_3V3_SHAPER    = reg_pwr_en[2];
+assign ON_5V0_SUM       = reg_pwr_en[2];
+//TDC power enable
+assign ON_3V3_TDC       = reg_pwr_en[3];
+assign ON_2V5_TDC       = PGOOD_3V3_TDC;
+//HV Power enable
+assign ON_5V0_BIAS      = reg_pwr_en[5];
+
+//*****CLOCK CONTROL*****//
+assign CLK_MUX_OE       = 1'b1;
+assign CLK_MUX_SEL      = 1'b0; //DTC clock
 
 endmodule

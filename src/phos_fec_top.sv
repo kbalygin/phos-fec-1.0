@@ -239,6 +239,12 @@ logic           dtc_data_vld;
 
 logic [15:0]    reg_pwr_en;
 
+logic [31:0][11:0]  hv_dac_data;
+logic               hv_update;
+
+logic [31:0][11:0]  th_dac_data;
+logic               th_update;
+
 assign ON_2V5_TDC = 1'b1;    
 
 main_pll main_pll_inst 
@@ -311,7 +317,7 @@ adc_event_buf adc_event_buf_inst
     
     ,   .trig_l0            (trig_l0)
     
-    ,   .rd_clk             (tdc_clk)
+    ,   .rd_clk             (dtc_clk)
     ,   .adc_buf_data_out   (adc_data_out)
     ,   .read_addr          (read_addr)
 
@@ -361,10 +367,10 @@ dtc_cmd dtc_cmd_inst
     ,   .channel_mask       ()
     ,   .altro_rst          ()
     ,   .fee_rst            ()
-    ,   .hv_update          ()
+    ,   .hv_update          (hv_update)
     ,   .firmvare           ()
     ,   .adc_data           ()
-    ,   .hv_dac_data        ()    
+    ,   .hv_dac_data        (hv_dac_data)    
 );
 //*****POWER CONTROL*****//
 //Clock power always enable
@@ -388,5 +394,31 @@ assign ON_5V0_BIAS      = reg_pwr_en[5];
 //*****CLOCK CONTROL*****//
 assign CLK_MUX_OE       = 1'b1;
 assign CLK_MUX_SEL      = 1'b0; //DTC clock
+
+//********HV DAC********//
+ad5328 hv_dac_inst
+(
+        .rst            ()
+    ,   .dtc_clk        (dtc_clk)
+    ,   .dac_data       (hv_dac_data)
+    ,   .dac_update     (hv_update)
+    ,   .din            (HV_DAC_DIN)
+    ,   .sync_n         (HV_DAC_SYNC_B)
+    ,   .ldac_n         (HV_DAC_LOAD_B)
+    ,   .sclk           (HV_DAC_SCLK)
+);
+
+//********TDC CONTROL*********//
+ad5328 threshold_dac_inst
+(
+        .rst            ()
+    ,   .dtc_clk        (dtc_clk)
+    ,   .dac_data       (th_update)
+    ,   .dac_update     (th_dac_data)
+    ,   .din            (THR_DAC_DIN)
+    ,   .sync_n         (THR_DAC_SYNC_B)
+    ,   .ldac_n         (THR_DAC_LOAD_B)
+    ,   .sclk           (THR_DAC_SCLK)
+);
 
 endmodule

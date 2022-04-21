@@ -37,7 +37,7 @@ module adc_event_buf
     
     input                   trig_l0,
     
-    output                  rd_clk,
+    input                   rd_clk,
     
     output  [767:0]         adc_buf_data_out,
     

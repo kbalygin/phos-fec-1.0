@@ -124,7 +124,7 @@ always_ff @(posedge dtc_clk)
 begin
     if(rst)
         state <= IDLE;
-    else if((dtc_out_cnt == 3) || (state == IDLE))
+    else
     begin
         case(state)
             IDLE:
@@ -134,20 +134,21 @@ begin
                 else if(streq)      state <= SEND_STATUS_HEADER;
             end
             
-            SEND_EVENT:             state <= SEND_EVENT_HEADER;
-            SEND_EVENT_HEADER:      state <= SEND_ADC;
-            SEND_ADC: if(done)      state <= SEND_TDC;
-            SEND_TDC: if(done)      state <= SEND_EVENT_TRAILER;
-            SEND_EVENT_TRAILER: if(done)    state <= IDLE;
+            SEND_EVENT:                                             state <= SEND_EVENT_HEADER;
+            SEND_EVENT_HEADER:  if(dtc_out_cnt == 3)                state <= SEND_ADC;
+            SEND_ADC:           if((done) && (dtc_out_cnt == 3))    state <= SEND_TDC;
+            SEND_TDC:           if((done) && (dtc_out_cnt == 3))    state <= SEND_EVENT_TRAILER;
+            SEND_EVENT_TRAILER: if((done) && (dtc_out_cnt == 3))    state <= IDLE;
             
-            SEND_DATA: if(data_vld) state <= SEND_DATA_HEADER;      
-            SEND_DATA_HEADER:       state <= SEND_ADDRESS_HIGH;
-            SEND_ADDRESS_HIGH:      state <= SEND_ADDRESS_LOW;
-            SEND_ADDRESS_LOW:       state <= SEND_DATA_HIGH;
-            SEND_DATA_HIGH:         state <= IDLE;
+            SEND_DATA:          if(data_vld)            state <= SEND_DATA_HEADER;      
+            SEND_DATA_HEADER:   if(dtc_out_cnt == 3)    state <= SEND_ADDRESS_HIGH;
+            SEND_ADDRESS_HIGH:  if(dtc_out_cnt == 3)    state <= SEND_ADDRESS_LOW;
+            SEND_ADDRESS_LOW:   if(dtc_out_cnt == 3)    state <= SEND_DATA_HIGH;
+            SEND_DATA_HIGH:     if(dtc_out_cnt == 3)    state <= SEND_DATA_LOW;
+            SEND_DATA_LOW:      if(dtc_out_cnt == 3)    state <= IDLE;
             
-            SEND_STATUS_HEADER:     state <= SEND_STATUS;
-            SEND_STATUS:            state <= IDLE;
+            SEND_STATUS_HEADER: if(dtc_out_cnt == 3)    state <= SEND_STATUS;
+            SEND_STATUS:        if(dtc_out_cnt == 3)    state <= IDLE;
             
             default:                state <= IDLE;
         endcase

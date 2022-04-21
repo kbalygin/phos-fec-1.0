@@ -27,7 +27,7 @@ module dtc_cmd
     input                   dtc_clk,
     input           [31:0]  address,
     input           [31:0]  write_data,
-    output logic    [31:0]  read_data,
+    output logic    [31:0]  read_data = 0,
     input                   write,
     input                   read,
     output logic            data_vld,
@@ -43,7 +43,7 @@ module dtc_cmd
     output logic            hv_update,
     input           [15:0]  firmvare,
     input           [9:0]   adc_data [14:0],
-    output logic    [11:0]  hv_dac_data [31:0]    
+    output logic    [31:0][11:0]  hv_dac_data = 0    
 );
 
 `define     CMD_REG_EN          8'h01   //  RW Power enable, 11 bits
@@ -72,7 +72,7 @@ logic [4:0]     map_address;
 
 logic [15:0]    serial_number;
 
-integer i;
+integer i, j, k;
 always_ff @(posedge dtc_clk)
 begin
     altro_rst   <= 1'b0;
@@ -82,7 +82,7 @@ begin
     begin
         if((address[7:4] == 4'h6) || (address[7:4] == 4'h7))
         begin
-            for(i = 0; i < 16; i = i + 1)
+            for(i = 0; i < 32; i = i + 1)
                 if((address - `CMD_HV_BASE) == i) hv_dac_data[i] <= write_data[11:0];
         end
         else case(address[7:0])
@@ -106,18 +106,18 @@ end
 always_ff @(posedge dtc_clk)
 begin
     data_vld <= 1'b0;
-
     if(read)
     begin
+        data_vld <= 1'b1;
         if((address[7:4] == 4'h6) || (address[7:4] == 4'h7))
         begin
-            for(i = 0; i < 16; i = i + 1)
-                if((address - `CMD_HV_BASE) == i) read_data   <= {{20{1'b0}}, hv_dac_data[i]};
+            for(j = 0; j < 32; j = j + 1)
+                if((address - `CMD_HV_BASE) == j) read_data   <= {{20{1'b0}}, hv_dac_data[j]};
         end
         else if(address[7:4] == 4'h5)
         begin
-            for(i = 0; i < 15; i = i + 1)
-                if((address - `CMD_ADC_DATA_BASE) == i) read_data   <= {{22{1'b0}}, adc_data[i]};
+            for(k = 0; k < 15; k = k + 1)
+                if((address - `CMD_ADC_DATA_BASE) == k) read_data   <= {{22{1'b0}}, adc_data[k]};
         end
         else case(address[7:0])
             `CMD_REG_EN:            read_data   <= {{21{1'b0}}, reg_pwr_en};
@@ -130,7 +130,7 @@ begin
             `CMD_CNANNEL_MASK_2:    read_data   <= channel_mask[47:32];
             `CMD_CNANNEL_MASK_3:    read_data   <= channel_mask[63:48];
             `CMD_SERIAL_NUMBER:     read_data   <= serial_number;
-            default: ;
+            default: read_data <= address;
         endcase
     end
 end

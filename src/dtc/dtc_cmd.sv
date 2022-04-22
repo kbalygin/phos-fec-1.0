@@ -112,12 +112,12 @@ begin
         if((address[7:4] == 4'h6) || (address[7:4] == 4'h7))
         begin
             for(j = 0; j < 32; j = j + 1)
-                if((address - `CMD_HV_BASE) == j) read_data   <= {{20{1'b0}}, hv_dac_data[j]};
+                if((address[30:0] - `CMD_HV_BASE) == j) read_data   <= {{20{1'b0}}, hv_dac_data[j]};
         end
         else if(address[7:4] == 4'h5)
         begin
             for(k = 0; k < 15; k = k + 1)
-                if((address - `CMD_ADC_DATA_BASE) == k) read_data   <= {{22{1'b0}}, adc_data[k]};
+                if((address[30:0] - `CMD_ADC_DATA_BASE) == k) read_data   <= {{22{1'b0}}, adc_data[k]};
         end
         else case(address[7:0])
             `CMD_REG_EN:            read_data   <= {{21{1'b0}}, reg_pwr_en};

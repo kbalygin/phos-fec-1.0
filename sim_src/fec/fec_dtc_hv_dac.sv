@@ -170,7 +170,7 @@ phos_fec_v1     phos_fec_v1_dut
     ,   .TDC_EVENT          ()
     ,   .TDC_ERR            ()
     ,   .TDC_RESET          ()
-    ,   .TDC_TRIG           (trig_l0)
+    ,   .TDC_TRIG           ()
    // HPTDC parallel data
     ,   .TDC_DRDY           ()
     ,   .TDC_GETD           ()
@@ -205,7 +205,7 @@ begin
     dtc_trig = 0;
     #10
     rst = 0;
-    #200
+    #1500
     SlowCommand(32'h00000060, 32'h00000033);
     #100
     SlowCommand(32'h00000061, 32'h00000077);
@@ -255,9 +255,10 @@ task SlowCommand
     input [31:0]    address,
     input [31:0]    data
 );
-    automatic integer i = 71;
-    automatic logic [71:0] data_to_dtc;
-    data_to_dtc = {`SLOWCMD, address, data};
+    automatic integer i = 72;
+    logic [72:0] data_to_dtc;
+    data_to_dtc = {`SLOWCMD, address, data, 1'b0};
+    @(posedge dtc_clk)
     do begin
         @(negedge dtc_clk) dtc_trig = data_to_dtc[i];
         @(posedge dtc_clk) dtc_trig = 0;

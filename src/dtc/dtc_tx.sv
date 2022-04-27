@@ -51,6 +51,7 @@ parameter event_dummy 		= 16'h8012;
 enum logic [7:0]    {   IDLE,
                         SEND_STATUS_HEADER,
                         SEND_STATUS,
+                        SEND_DATA_WAIT_VLD,
                         SEND_DATA,
                         SEND_DATA_HEADER,
                         SEND_ADDRESS_HIGH,
@@ -130,7 +131,7 @@ begin
             IDLE:
             begin
                 if(rdocmd)          state <= SEND_EVENT;
-                else if(read)       state <= SEND_DATA;
+                else if(read)       state <= SEND_DATA_WAIT_VLD;
                 else if(streq)      state <= SEND_STATUS_HEADER;
             end
             
@@ -140,12 +141,15 @@ begin
             SEND_TDC:           if((done) && (dtc_out_cnt == 3))    state <= SEND_EVENT_TRAILER;
             SEND_EVENT_TRAILER: if((done) && (dtc_out_cnt == 3))    state <= IDLE;
             
-            SEND_DATA:          if(data_vld)            state <= SEND_DATA_HEADER;      
-            SEND_DATA_HEADER:   if(dtc_out_cnt == 3)    state <= SEND_ADDRESS_HIGH;
-            SEND_ADDRESS_HIGH:  if(dtc_out_cnt == 3)    state <= SEND_ADDRESS_LOW;
-            SEND_ADDRESS_LOW:   if(dtc_out_cnt == 3)    state <= SEND_DATA_HIGH;
-            SEND_DATA_HIGH:     if(dtc_out_cnt == 3)    state <= SEND_DATA_LOW;
-            SEND_DATA_LOW:      if(dtc_out_cnt == 3)    state <= IDLE;
+            SEND_DATA_WAIT_VLD: if(data_vld)
+                                    if(dtc_out_cnt == 3)    state <= SEND_DATA_HEADER;
+                                    else                    state <= SEND_DATA;
+            SEND_DATA:          if(dtc_out_cnt == 3)        state <= SEND_DATA_HEADER;      
+            SEND_DATA_HEADER:   if(dtc_out_cnt == 3)        state <= SEND_ADDRESS_HIGH;
+            SEND_ADDRESS_HIGH:  if(dtc_out_cnt == 3)        state <= SEND_ADDRESS_LOW;
+            SEND_ADDRESS_LOW:   if(dtc_out_cnt == 3)        state <= SEND_DATA_HIGH;
+            SEND_DATA_HIGH:     if(dtc_out_cnt == 3)        state <= SEND_DATA_LOW;
+            SEND_DATA_LOW:      if(dtc_out_cnt == 3)        state <= IDLE;
             
             SEND_STATUS_HEADER: if(dtc_out_cnt == 3)    state <= SEND_STATUS;
             SEND_STATUS:        if(dtc_out_cnt == 3)    state <= IDLE;
@@ -188,7 +192,7 @@ begin
     if(state == SEND_EVENT)
     begin
         ch_cnt <= 63;
-        sample_cnt <= event_window;
+        sample_cnt <= event_window - 1;
     end
     else if(write_dtc_word)
     begin
@@ -198,7 +202,7 @@ begin
                 sample_cnt <= sample_cnt - 1;
             else
             begin
-                sample_cnt <= event_window;
+                sample_cnt <= event_window - 1;
                 ch_cnt <= ch_cnt - 1;
             end
         end

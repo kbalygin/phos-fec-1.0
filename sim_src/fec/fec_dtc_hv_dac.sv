@@ -207,19 +207,19 @@ begin
     rst = 0;
     #1500
     SlowCommand(32'h00000060, 32'h00000033);
-    #100
+    #200
     SlowCommand(32'h00000061, 32'h00000077);
-    #100
+    #200
     SlowCommand(32'h00000062, 32'h00000099);
-    #100
+    #200
     SlowCommand(32'h00000071, 32'h000000F0);
-    #100
+    #200
     SlowCommand(32'h80000060, 32'h0);
-    #100
+    #200
     SlowCommand(32'h80000071, 32'h0);
-    #100
+    #200
     SlowCommand(32'h0000001e, 32'h0);
-    #100
+    #200
     FastCommand(`RDOCMD);
     #400000 $finish;
 end

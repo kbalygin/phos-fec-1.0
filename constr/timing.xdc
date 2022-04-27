@@ -11,24 +11,24 @@ create_clock -period 2.082 -name adc_dclk_0 -waveform {0.000 1.041} [get_ports {
 create_clock -period 2.082 -name adc_dclk_1 -waveform {0.000 1.041} [get_ports {ADC_DCLK_P[1]}]
 
 
-#### generated clocks for MMCM1 (clk_adc, clk4x_adc, clk_tdc)
-#create_generated_clock -name g_clk_tdc   -source [get_ports CLK_TDC_P] -divide_by 1   -add -master_clock clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT0]
-#create_generated_clock -name g_clk_adc   -source [get_ports CLK_TDC_P] -multiply_by 2 -add -master_clock clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT1]
-#create_generated_clock -name g_clk4x_tdc -source [get_ports CLK_TDC_P] -multiply_by 4 -add -master_clock clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT2]
+### generated clocks for MMCM1 (clk_adc, clk4x_adc, clk_tdc)
+create_generated_clock -name g_clk_tdc   -source [get_ports CLK_TDC_P] -divide_by 1   -add -master_clock clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT0]
+create_generated_clock -name g_clk_adc   -source [get_ports CLK_TDC_P] -multiply_by 2 -add -master_clock clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT1]
+create_generated_clock -name g_clk4x_tdc -source [get_ports CLK_TDC_P] -multiply_by 4 -add -master_clock clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT2]
 
-#### generated clocks for MMCM2 (clk_eth, clk200, clk25)
-#create_generated_clock -name g_clk_eth -source [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT0] -divide_by 8 -multiply_by 25 -add -master_clock g_clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_2/CLKOUT0]
-#create_generated_clock -name g_clk200  -source [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT0] -multiply_by 5 -add -master_clock g_clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_2/CLKOUT1]
-#create_generated_clock -name g_clk25   -source [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT0] -divide_by 8 -multiply_by 5 -add -master_clock g_clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_2/CLKOUT2]
+### generated clocks for MMCM2 (clk_eth, clk200, clk25)
+create_generated_clock -name g_clk_eth -source [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT0] -divide_by 8 -multiply_by 25 -add -master_clock g_clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_2/CLKOUT0]
+create_generated_clock -name g_clk200  -source [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT0] -multiply_by 5 -add -master_clock g_clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_2/CLKOUT1]
+create_generated_clock -name g_clk25   -source [get_pins phos_fec_clocks/MMCME_BASE_inst_1/CLKOUT0] -divide_by 8 -multiply_by 5 -add -master_clock g_clk_tdc [get_pins phos_fec_clocks/MMCME_BASE_inst_2/CLKOUT2]
 
 
-#### false path: clk_tdc <> clk_eth
-#set_false_path -from [get_clocks g_clk_tdc] -to [get_clocks g_clk_eth]
-#set_false_path -from [get_clocks g_clk_eth] -to [get_clocks g_clk_tdc]
+### false path: clk_tdc <> clk_eth
+set_false_path -from [get_clocks g_clk_tdc] -to [get_clocks g_clk_eth]
+set_false_path -from [get_clocks g_clk_eth] -to [get_clocks g_clk_tdc]
 
 
 ###
-#set_clock_groups -name async_clk -asynchronous -group [get_clocks -include_generated_clocks clk_mgt] -group [get_clocks -include_generated_clocks clk_dtc] -group [get_clocks -include_generated_clocks clk_tdc] -group [get_clocks -include_generated_clocks clk_osc_40] -group [get_clocks -include_generated_clocks clk_osc_125]
+set_clock_groups -name async_clk -asynchronous -group [get_clocks -include_generated_clocks clk_mgt] -group [get_clocks -include_generated_clocks clk_dtc] -group [get_clocks -include_generated_clocks clk_tdc] -group [get_clocks -include_generated_clocks clk_osc_40] -group [get_clocks -include_generated_clocks clk_osc_125]
 
 
 

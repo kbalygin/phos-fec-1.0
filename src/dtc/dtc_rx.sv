@@ -57,7 +57,7 @@ logic           trig_1, trig_2;
 logic [1:0]     trigger_state = 2'b00;
 
 logic [71:0]    data_from_sru = 0;
-logic [5:0]     bits_cnt = 0;
+logic [6:0]     bits_cnt = 0;
 
 IDDR 
 # (
@@ -96,17 +96,19 @@ always_ff @(posedge dtc_clk_90) data_from_sru <= {data_from_sru[70:0], trig_2};
 
 always_ff @(posedge dtc_clk_90)
 begin
-    if((data_from_sru[71:64] == `SLOWCMD) && (bits_cnt == 0))
-        {address, data} <= data_from_sru[63:0];
-    else if(bits_cnt != 0)
+    if(bits_cnt != 0)
         bits_cnt <= bits_cnt - 1;
     else if(data_from_sru[7:0] == `SLOWCMD)
-        bits_cnt <= 63;
+        bits_cnt <= 64;
 end
 
 always_ff @(posedge dtc_clk_90)
+    if((data_from_sru[71:64] == `SLOWCMD) && (bits_cnt == 1))
+        {address, data} <= data_from_sru[63:0];    
+
+always_ff @(posedge dtc_clk_90)
 begin
-    if((data_from_sru[71:64] == `SLOWCMD) && (bits_cnt == 0))
+    if((data_from_sru[71:64] == `SLOWCMD) && (bits_cnt == 1))
     begin
         if(data_from_sru[63])
             read <= 1'b1;

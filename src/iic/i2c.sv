@@ -143,7 +143,7 @@ begin
         READ_BIT_2:
         begin
             scl <= 1'b0;
-            data_out <= {data_out[6:0], sda};
+            data_out <= {data_out[6:0], iic_sda};
             if(cnt != 0)
             begin
                 cnt <= cnt - 1;
@@ -165,7 +165,8 @@ begin
         ACK_1:
         begin
             scl <= 1'b0;
-            ack_in <= sda;
+            ack_in <= iic_sda;
+            sda <= 1'b1;
             if(last_int)
                 state <= STOP_0;
             else

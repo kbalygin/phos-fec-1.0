@@ -81,25 +81,25 @@ begin
     rst = 0;
     #100
     FastCommand(`RSTCMD);
-    #50
+    #500
     L0;
-    #100
+    #1000
     L1;
-    #100
+    #1000
     SlowCommand(32'h00000060, 32'h0033);
-    #100
+    #1000
     SlowCommand(32'h00000061, 32'h0077);
-    #100
+    #1000
     SlowCommand(32'h00000062, 32'h0099);
-    #100
+    #1000
     SlowCommand(32'h00000071, 32'h00F0);
-    #100
+    #1000
     SlowCommand(32'h80000060, 32'h0000);
-    #100
+    #1000
     SlowCommand(32'h80000071, 32'h0000);
-    #100
+    #1000
     SlowCommand(32'h0000001e, 32'h0000);
-    #100
+    #1000
     FastCommand(`RDOCMD);
     #400000 $finish;
 end

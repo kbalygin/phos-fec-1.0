@@ -220,7 +220,7 @@ begin
     #200
     SlowCommand(32'h0000001e, 32'h0);
     #200
-    FastCommand(`RDOCMD);
+//    FastCommand(`RDOCMD);
     #400000 $finish;
 end
 

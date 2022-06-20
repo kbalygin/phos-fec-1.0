@@ -256,7 +256,7 @@ main_pll main_pll_inst
     ,   .clk_out4   (adc_clk_4x)
     ,   .clk_out5   ()
   // Status and control signals
-    ,   .reset      ()
+    ,   .reset      (1'b0)
     ,   .locked     ()
  // Clock in ports
     ,   .clk_in1    (dtc_clk)
@@ -327,7 +327,7 @@ dtc_phos_fec_v1 dtc_phos_fec_v1_inst
 (
         .rst                (1'b0)
     ,   .dtc_clk            (dtc_clk)
-    ,   .dtc_clk_90         (dtc_clk_90)
+    ,   .dtc_clk_90         (dtc_clk)//(dtc_clk_90)
     ,   .dtc_trig           (dtc_trig)
     ,   .dtc_data           (dtc_data)
     ,   .dtc_return         (dtc_return)

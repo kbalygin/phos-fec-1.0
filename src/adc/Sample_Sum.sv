@@ -23,7 +23,7 @@
 module Sample_Sum
 #(
     parameter   presample_num   = 8,
-    parameter   sample_num      = 16 
+    parameter   sample_num      = 24 
 ) (
     input       clk,
     input       rst,
@@ -36,7 +36,7 @@ module Sample_Sum
 );
 
 localparam   presample_shift = $clog2(presample_num);
-localparam   sample_shift = $clog2(sample_num);
+localparam   sample_shift = $clog2(sample_num) - 1;
 
 enum logic [7:0]    {   IDLE,
                         PRESAMPLE_SUM,
@@ -44,6 +44,7 @@ enum logic [7:0]    {   IDLE,
 
 logic [15:0] presample_sum;
 logic [15:0] sample_sum;
+logic [11:0] pedestal;
 logic [7:0] cnt;
 
 always_ff @(posedge clk)
@@ -63,7 +64,7 @@ begin
                 begin
                     presample_sum <= 0;
                     sample_sum <= 0;
-                    cnt <= presample_num;
+                    cnt <= presample_num - 1;
                     state <= PRESAMPLE_SUM;
                 end
             PRESAMPLE_SUM:
@@ -76,6 +77,7 @@ begin
                 else
                 begin
                     cnt <= sample_num;
+                    pedestal <= ((presample_sum + data_in) >> presample_shift);
                     state <= SAMPLE_SUM;
                 end
             end
@@ -84,11 +86,11 @@ begin
                 if(cnt != 0)
                 begin
                     cnt <= cnt - 1;
-                    sample_sum <= sample_sum + data_in;
+                    sample_sum <= sample_sum + data_in - pedestal;
                 end
                 else
                 begin
-                    data_out <= (sample_sum >> sample_shift) - (presample_sum >> presample_shift);
+                    data_out <= (sample_sum >> sample_shift);
                     state <= IDLE;
                 end
             end

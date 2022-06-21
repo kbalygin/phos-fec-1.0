@@ -64,7 +64,7 @@ logic [11:0] data_out;
 Sample_Sum 
 #(
         .presample_num   (4)
-    ,   .sample_num      (16) 
+    ,   .sample_num      (24) 
 ) Sample_Sum_dut (
         .clk        (clk)
     ,   .rst        (rst)
